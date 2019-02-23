@@ -848,6 +848,7 @@ final class Template {
     } else {
       $url = $url_sent;
       $url_type = NULL;
+      check if it matches here chapter or regular -- just a note before I leave so I do not forget
     }
     
     if (strtolower(substr( $url, 0, 6 )) === "ttp://" || strtolower(substr( $url, 0, 7 )) === "ttps://") { // Not unusual to lose first character in copy and paste
@@ -856,20 +857,27 @@ final class Template {
         $this->set($url_type, $url); // Save it
       }
     }
-   
+    // https://www.jstor.org.stuff/proxy/stuff/stable/3347357 and such
     if (preg_match('~^(https?://(?:www\.|)jstor\.org)(?:\S*proxy\S*/|/)(?:stable|discover)/10.2307/(.+)$~i', $url, $matches)) {
        $url = $matches[1] . '/stable/' . $matches[2] ; // that is default.  This also means we get jstor not doi
        if (!is_null($url_sent)) {
          $this->set($url_type, $url); // Update URL with cleaner one.  Will probably call forget on it below
        }
     }
-    
+    // https://www.jstor.org.libweb.lib.utsa.edu/stable/3347357 and such
+    if (preg_match('~^https?://(?:www\.|)jstor\.org\.[^/]+/(?:stable|discover)/(.+)$~i', $url, $matches)) {
+       $url = 'https://www.jstor.org/stable/' . $matches[1] ;
+       if (!is_null($url_sent)) {
+         $this->set($url_type, $url); // Update URL with cleaner one
+       }
+    }
+    // https://www-jstor-org.libezp.lib.lsu.edu/stable/10.7249/j.ctt4cgd90.10 and such
     if (preg_match('~^https?://(?:www-|)jstor-org[-\.]\S+/(?:stable|discover)/(.+)$~i', $url, $matches)) {
        $url = 'https://www.jstor.org/stable/' . $matches[1] ;
        if (!is_null($url_sent)) {
          $this->set($url_type, $url); // Update URL with cleaner one
        }
-    }   
+    }
     
     if (preg_match("~^https?://(?:d?x?\.?doi\.org|doi\.library\.ubc\.ca)/([^\?]*)~i", $url, $match)) {
         quietly('report_modification', "URL is hard-coded DOI; converting to use DOI parameter.");
